@@ -8,6 +8,7 @@ import re
 def error(nome) :
 	print 'Erro na função',nome
 
+
 def Programa(listaTokens,i):
 	if(listaTokens[i] == 'INT'):
 		if(listaTokens[i+1] == 'MAIN'):
@@ -21,7 +22,11 @@ def Programa(listaTokens,i):
 						else:
 							print error('programa')
 							return i+1
-
+					else: print error('Deveria aparecer um: {')
+				else: print error('Deveria aparecer um: )')
+			else: print error('Deveria aparecer um: (')
+		else: print error('Deveria aparecer um: main')	
+				
 def Decl_Comando(listaTokens,i):  
     if (listaTokens[i] == 'INT' or listaTokens[i] == 'FLOAT'):   
         i = Declaracao(listaTokens,i); 
