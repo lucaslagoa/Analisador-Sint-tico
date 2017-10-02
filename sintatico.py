@@ -4,47 +4,9 @@
 import unicodedata
 import re
 
-def declaracao1(listaTokens, i):
-	if((listaTokens[i] == 'INT') or (listaTokens[i]=='FLOAT')):
-		if(listaTokens[i+1] != 'MAIN'):
-			i=i+1
-			i = identificador(listaTokens,i)
-			i = atribuicao1(listaTokens,i)
-			i = numeral(listaTokens,i)
-			return i	
-		else:
-			return i+1
-
-def identificador(listaTokens, i):
-	if(listaTokens[i] != 'ID' ):
-		print 'O token deve ser um identificador !'
-		error('identificador')
-		return i
-	else: 
-		return i+1
-
-def atribuicao1(listaTokens,i):
-	if(listaTokens[i] != 'ATTR' and listaTokens[i] != 'COMMA' and listaTokens[i] != 'PCOMMA'):
-		print 'O token deve ser um = ou , ou ;'
-		error('atribuicao')
-		return i
-	else:
-		return i+1
-
-def numeral(listaTokens,i):
-	if(listaTokens[i] != 'INTEGER_CONST' and listaTokens[i] != 'FLOAT_CONST'):
-		print 'erro'
-		error('numeral')
-	else: 
-		return i+1	
 
 def error(nome) :
 	print 'Erro na função',nome
-
-def repeticao(listaTokens,i):
-	if(listaTokens[i] == 'WHILE'):
-		i=i+1
-	return i
 
 def Programa(listaTokens,i):
 	if(listaTokens[i] == 'INT'):
@@ -54,7 +16,6 @@ def Programa(listaTokens,i):
 					if(listaTokens[i+4] == 'LBRACE'):
 						i=i+4
 						i = Decl_Comando(listaTokens,i);
-						print i
 						if(listaTokens[i] == 'RBRACE'):
 							return i
 						else:
@@ -78,7 +39,7 @@ def Declaracao(listaTokens,i):
 	i = Tipo(listaTokens,i);
 	if (listaTokens[i] == 'ID'):
 		i=i+1
-		i = Decl2();
+		i = Decl2(listaTokens,i);
 		return i;
 	else:
 		return i+1
