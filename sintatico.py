@@ -104,6 +104,31 @@ def Tipo(listaTokens,i):
 		i = i + 1
 		return i
 
+def Comando(listaTokens,i):
+	if(listaTokens[i] == 'LBRACE'):
+		i = Bloco(listaTokens,i)
+		i = i + 1
+		return i
+	elif(listaTokens[i] == 'ID'):
+		i = Atribuicao(listaTokens,i)
+		i = i + 1
+		return i
+	elif(listaTokens[i] == 'IF'):
+		i = ComandoSe(listaTokens,i)
+		i = i + 1	
+		return i
+	elif(listaTokens[i] == 'WHILE'):
+		i = ComandoEnquanto(listaTokens,i)
+		i = i + 1
+		return i
+	elif(listaTokens[i] == 'READ'):
+		i = ComandoRead(listaTokens,i)
+		i = i + 1
+		return i
+	elif(listaTokens[i] == 'PRINT'):
+		i = ComandoPrint(listaTokens,i)
+		i = i + 1
+		return i
 
 def Bloco(listaTokens,i):
 	if(listaTokens[i] == 'LBRACE'):
@@ -170,3 +195,178 @@ def ComandoRead(listaTokens,i):
 			else:
 				return i
 				print error('ComandoRead')			
+
+def ComandoSe(listaTokens,i):
+	if(listaTokens[i] == 'IF'):
+		i=i+1
+		if(listaTokens[i] == 'LBRACKET'):
+			i=i+1
+			i=Expressao(listaTokens,i)
+			#i=i+1
+			if(listaTokens[i] == 'RBRACKET'):
+				i=i+1
+				i = Comando(listaTokens,i)
+				#i=i+1
+				i = ComandoSenao(listaTokens,i)
+				return i
+			else: 
+				return i+1
+				print error('ComandoSe')	
+
+def ComandoSenao(listaTokens,i):
+	if(listaTokens[i] == 'ELSE'):
+		i=i+1
+		i = Comando(listaTokens,i)
+		return i 
+	else: 
+		return i+1				
+
+def ComandoEnquanto(listaTokens,i):
+	if(listaTokens[i] == 'WHILE'):
+		i=i+1
+		if(listaTokens[i] == 'LBRACKET'):
+			i=i+1
+			i = Expressao(listaTokens,i)
+			if(listaTokens[i] == 'RBRACKET'):
+				i = i + 1
+				i = Expressao(listaTokens,i)
+				return i
+			else:
+				return i + 1
+				print error('ComandoEnquanto')
+
+def ComandoPrint(listaTokens,i):
+	if(listaTokens[i] == 'PRINT'):
+		i=i+1
+		if(listaTokens[i] == 'LBRACKET'):
+			i=i+1
+			i = Expressao(listaTokens,i)
+			if(listaTokens[i] == 'RBRACKET'):
+				i=i+1
+				if(listaTokens[i] == 'PCOMMA'):
+					i=i+1
+					return i
+	else:
+		return i+1
+		print error('ComandoPrint')		
+
+def Expressao(listaTokens,i):
+	i = Conjuncao(listaTokens,i)
+	i = i + 1
+	i = ExpressaoOpc(listaTokens,i)
+	i = i + 1 
+	return i
+
+def ExpressaoOpc(listaTokens,i):
+	if(listaTokens[i] == 'OR'):
+		i = i + 1
+		i = Conjuncao(listaTokens,i)
+		i = i + 1
+		i = ExpressaoOpc(listaTokens,i)
+		return i
+	else:	
+		return i + 1
+
+def Conjuncao(listaTokens,i):
+	i = Igualdade(listaTokens,i)
+	i = i + 1
+	i = ConjuncaoOpc(listaTokens,i)
+	i = i + 1
+	return i
+
+def ConjuncaoOpc(listaTokens,i):
+	if(listaTokens[i] == 'AND'):
+		i = i + 1
+		i = Igualdade(listaTokens,i)
+		i = i + 1
+		i = ConjuncaoOpc(listaTokens,i)
+		i = i + 1
+		return i
+	else: 
+		return i + 1
+
+def Igualdade(listaTokens,i):
+	i = Relacao(listaTokens,i)
+	i = i + 1
+	i = IgualdadeOpc(listaTokens,i)
+	i = i + 1
+	return i 
+
+def IgualdadeOpc(listaTokens,i):
+	i = OpIgual(listaTokens,i)
+	i = i + 1
+	i = Relacao(listaTokens,i)
+	i = i + 1
+	i = RelacaoOpc(listaTokens,i)
+	i = i + 1
+	return i
+	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA
+
+def Relacao(listaTokens,i):
+	i = Adicao(listaTokens,i)
+	i = i + 1
+	i = RelacaoOpc(listaTokens,i)	
+	i = i + 1
+	return i 
+
+def RelacaoOpc(listaTokens,i):
+	i = OpRel(listaTokens,i)
+	i = i + 1
+	i = Adicao(listaTokens,i)
+	i = i + 1
+	i = RelacaoOpc(listaTokens,i)
+	i = i + 1
+	return i
+	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA
+
+def Adicao(listaTokens,i):
+	i = Termo(listaTokens,i)
+	i = i + 1
+	i = AdicaoOpc(listaTokens,i)
+	i = i + 1
+	return i
+
+def AdicaoOpc(listaTokens,i):
+	i = OpAdicao(listaTokens,i)
+	i = i + 1
+	i = Termo(listaTokens,i)
+	i = i + 1
+	i = AdicaoOpc(listaTokens,i)
+	i = i + 1
+	return i
+	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA	
+
+def Termo(listaTokens,i):
+	i = Fator(listaTokens,i)
+	i = i + 1
+	i = TermoOpc(listaTokens,i)
+	i = i + i
+	return i
+
+def TermoOpc(listaTokens,i):
+	i = OpMult(listaTokens,i)
+	i = i + 1
+	i = Fator(listaTokens,i)
+	i = i + 1
+	i = TermoOpc(listaTokens,i)
+	i = i + 1
+	return i 
+	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR 
+
+def Fator(listaTokens,i):
+	if(listaTokens[i] == 'ID'):
+		i = i + 1
+	elif(listaTokens[i] == 'INTEGER_CONST'):
+		i = i + 1
+	elif(listaTokens[i] == 'FLOAT_CONST'):
+		i = i + 1
+	elif(listaTokens[i] == 'LBRACKET'):
+		i = i + 1
+		i = Expressao(listaTokens,i)
+		i = i + 1
+		if(listaTokens[i] == 'RBRACKET'):
+			i = i + 1
+			return i 
+		else:
+			return i + 1
+			print error('fator')	
