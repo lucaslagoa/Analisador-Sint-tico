@@ -4,6 +4,17 @@
 import unicodedata
 import re
 
+def TabelaSimbolos(listaTokens,listaValor,i):
+
+	tipo = []
+	print listaTokens[i],listaValor[i]
+	if(listaTokens[i] == 'INT'):
+			tipo[i] = 'int'
+	elif(listaTokens[i] == 'FLOAT'):
+			tipo[i]	= 'float'
+	print tipo[i]
+
+	return i
 
 def error(nome) :
 	print 'Erro na função',nome
