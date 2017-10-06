@@ -30,6 +30,7 @@ class Lexico(object):
 		arq = open('teste.txt', 'r')
 		self.caracteres = list(arq.read())
 		self.linha = 0
+		self.TabelaSimbolos = []
 
 	
 	def separador(self, token):	
@@ -262,7 +263,7 @@ class Lexico(object):
 
 
 		elif(self.numeroFloat(token)):
-
+				print token
 				lexema = token
 				lexema = "FLOAT_CONST"
 				#print token, "\t",self.linha,"\t",lexema
@@ -273,7 +274,6 @@ class Lexico(object):
 				ocorrencia = Ocorrencia(nomeLista, posicaoLista, self.linha, coluna)
 
 		elif(self.numeroInt(token)):
-
 			lexema = token
 			lexema = "INTEGER_CONST"
 			#print token, "\t",self.linha,"\t",lexema
