@@ -25,7 +25,8 @@ class Lexico(object):
 					  	    'separadores1':[],
 					  	    'reservadas1':[],
 					  	    'erros':[],
-					  	    'tokens':[]}
+					  	    'tokens':[],
+					  	    'lexema':[]}
 
 		arq = open('teste.txt', 'r')
 		self.caracteres = list(arq.read())
@@ -89,66 +90,79 @@ class Lexico(object):
 				token = result[1]
 
 			if (token == "="):
+				self.addToken(token,'lexema')	
 				lexema = token
 				lexema = "ATTR"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')	
 			if (token == "<"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "LT"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "<="):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "LE"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == ">"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "GT"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == ">="):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "GE"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')	
 			if (token == "=="):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "EQ"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')	
 			if (token == "!="):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "NE"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "||"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "OR"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "&&"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "AND"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "+"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "PLUS"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "-"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "MINUS"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "*"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "MULT"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "/"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "DIV"
 				#print token, "\t",self.linha,"\t",lexema
@@ -177,31 +191,37 @@ class Lexico(object):
 			if(token == '\n'):				
 				self.linha +=1;
 			if (token == "("):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "LBRACKET"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == ")"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "RBRACKET"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "{"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "LBRACE"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "}"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "RBRACE"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == ","):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "COMMA"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == ";"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "PCOMMA"
 				#print token, "\t",self.linha,"\t",lexema
@@ -215,41 +235,49 @@ class Lexico(object):
 
 		elif(self.reservadas(token)):
 			if (token == "int"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "INT"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "main"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "MAIN"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "float"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "FLOAT"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "if"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "IF"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "else"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "ELSE"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "while"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "WHILE"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')
 			if (token == "read"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "READ"
 				#print token, "\t",self.linha,"\t",lexema
 				self.addToken(lexema,'tokens')	
 			if (token == "print"):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "PRINT"
 				#print token, "\t",self.linha,"\t",lexema
@@ -263,7 +291,7 @@ class Lexico(object):
 
 
 		elif(self.numeroFloat(token)):
-				print token
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "FLOAT_CONST"
 				#print token, "\t",self.linha,"\t",lexema
@@ -274,6 +302,7 @@ class Lexico(object):
 				ocorrencia = Ocorrencia(nomeLista, posicaoLista, self.linha, coluna)
 
 		elif(self.numeroInt(token)):
+			self.addToken(token,'lexema')
 			lexema = token
 			lexema = "INTEGER_CONST"
 			#print token, "\t",self.linha,"\t",lexema
@@ -294,6 +323,7 @@ class Lexico(object):
 
 			nomeLista = 'identificadores1'		
 			if(token not in self.listaTokens['erros']):
+				self.addToken(token,'lexema')
 				lexema = token
 				lexema = "ID"
 				#print token, "\t",self.linha,"\t",lexema
@@ -327,7 +357,7 @@ def main():
 	lexico = Lexico()
 	lexico.run()
 
-
+	print "Lexemas \n", lexico.listaTokens['lexema'],'\n'
 	#print "Operadores \n", lexico.listaTokens['operadores1'],'\n'
 	#print "Separadores \n", lexico.listaTokens['separadores1'],'\n'
 	#print "Reservadas \n", lexico.listaTokens['reservadas1'],'\n'
@@ -335,7 +365,7 @@ def main():
 	#print "Float\n", lexico.listaTokens['float'], '\n'
 	#print "Identificadores\n", lexico.listaTokens['identificadores1'], '\n'
 	#print "Erros\n", lexico.listaTokens['erros'], '\n'
-	#print "Tokens\n",lexico.listaTokens['tokens'],'\n'
+	print "Tokens\n",lexico.listaTokens['tokens'],'\n'
 
 	#print "OCORRENCIAS:\n"
 	#for o in lexico.listaTokens['ocorrencias']:

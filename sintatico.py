@@ -4,46 +4,55 @@
 import unicodedata
 import re
 from analex import *
+import hashlib
+
 object = Lexico()
 
 object.run()
 
-object.listaTokens = object.listaTokens['tokens']
-def TabelaSimbolos():
-	print object.listaTokens
-	tamanho = len(object.listaTokens)
-	tipo = []
-	tabela = []
-	for i in range(0,tamanho): 
-		if((object.listaTokens[i] == 'INT' or object.listaTokens[i] == 'FLOAT') and object.listaTokens[i+1] == 'ID'):
-			tipo = []
-			while(object.listaTokens[i] != 'PCOMMA'):
-				if(object.listaTokens[i] == 'INT' or object.listaTokens[i] == 'FLOAT'):
-					tipo.append(object.listaTokens[i])
-				elif(object.listaTokens[i] == 'ID'):
-					tipo.append(object.listaTokens[i])
-					if(object.listaTokens[i+1] == 'PCOMMA'):
-						tipo.append('0')
-					elif(object.listaTokens[i+1] == 'COMMA'):
-						tipo.append('0')
-						tabela.append(tipo)
-						tipo = []
-						tipo.append(tabela[len(tabela)-1][0])
-					elif(object.listaTokens[i+1] == 'ATTR'):
-						if(object.listaTokens[i+3] == ('PLUS' or 'MINUS' or 'DIV' or 'MULT')):
-							i=i+3
-						elif(object.listaTokens[i+2] == ('INTEGER_CONST' or 'FLOAT_CONST')):
-							tipo.append(object.listaTokens[i+2])
-							i = i + 2
 
-				i=i+1		
-			tabela.append(tipo)
-			print tabela
+listaTokens = object.listaTokens['tokens']
+listaLexema = object.listaTokens['lexema']
+
+def TabelaSimbolos():
+	tamanho = len(listaTokens)
+	tipo = []
+	dict = {}
+	dict2 = {}
+	for i in range(0,tamanho): 
+		if((listaTokens[i] == 'INT' or listaTokens[i] == 'FLOAT') and listaTokens[i+1] == 'ID'):
+			tipo = []
+			tipo.append(listaTokens[i])
+			i = i+1
+			while(listaTokens[i] != 'PCOMMA'):
+				if(listaTokens[i] == 'ID'):
+					dict[listaLexema[i]] = (tipo, 0)
+
+				if(listaTokens[i+1] == 'PCOMMA'):
+					dict2[listaLexema[i]] = (tipo, 0)
+					dict.update(dict2)
+				elif(listaTokens[i+1] == 'COMMA'):
+					dict2[listaLexema[i]] = (tipo, 0)
+					dict.update(dict2)
+				elif(listaTokens[i+1] == 'ATTR'):
+					if(listaTokens[i+3] == ('PLUS' or 'MINUS' or 'DIV' or 'MULT')):
+						dict[listaLexema[i]] = (tipo, 0)
+						i=i+3
+
+					elif(listaTokens[i+2] == 'INTEGER_CONST' or listaTokens[i+2] == 'FLOAT_CONST'):
+						dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
+						dict.update(dict2)
+						i = i + 2
+					else:
+						dict[listaLexema[i]] = (tipo, 0)
+				i=i+1
+	print dict
 
 
 def match(token):
-	if(object.listaTokens[0] == token):
-		object.listaTokens.pop(0)
+	if(listaTokens[0] == token):
+		listaTokens.pop(0)
+		listaLexema.pop(0)
 		print 'Entrada correta'
 	else: 
 		print 'Erro sintatico'
@@ -54,316 +63,211 @@ def Programa():
 	match('LBRACKET')
 	match('RBRACKET')
 	match('LBRACE')
-	#Decl_Comando();
+	Decl_Comando();
 	match('RBRACE')
 		
 				
-"""def Decl_Comando():  
-    if (object.listaTokens[i] == 'INT' or object.listaTokens[i] == 'FLOAT'):   
-        i = Declaracao(); 
-        return  Decl_Comando();
-    elif (object.listaTokens[i] == 'ID' or object.listaTokens[i] == 'IF' or object.listaTokens[i] == 'WHILE' or object.listaTokens[i] == 'PRINT' 
-          or object.listaTokens[i] == 'READ'):
-        i = i + 1        
-        i = Comando(i); 
-        return i
+def Decl_Comando():  
+    if (listaTokens[0] == 'INT' or listaTokens[0] == 'FLOAT'):   
+        Declaracao(); 
+        Decl_Comando();
+        
+    elif (listaTokens[0] == 'ID' or listaTokens[0] == 'IF' or listaTokens[0] == 'WHILE' or listaTokens[0] == 'PRINT' 
+          or listaTokens[0] == 'READ' or listaTokens[0] == 'LBRACE'):
+       	Comando();
+       	Decl_Comando();
+
     else:
-        return i+1
-        print error('decl comando')
+        return i
 
 def Declaracao():
 	Tipo();
-	if (object.listaTokens[i] == 'ID'):
-		i=i+1
-		i = Decl2();
-		return i;
-	else:
-		return i+1
-		print error('declaracao')
+	match('ID')
+	Decl2();
 
-def Decl2(object.listaTokens,i):
-	if(object.listaTokens[i] == 'COMMA'):
-		i = i + 1
-		if(object.listaTokens[i] == 'ID'):
-			i = i + 1
-			i = Decl2(object.listaTokens,i);
-	elif(object.listaTokens[i] == 'PCOMMA'):
-		i = i + 1
-		return i
-	elif (object.listaTokens[i] == 'ATTR'):
-		i = i + 1
-		i = Expressao(object.listaTokens,i)
-		i = Decl2();
-		return i
 
-def Tipo(object.listaTokens,i):
-	if(object.listaTokens[i] == 'INT' or object.listaTokens[i] == 'FLOAT'):
-		i = i + 1
-		return i
+def Decl2():
+	if(listaTokens[0] == 'COMMA'):
+		match('COMMA')
+		match('ID')
+		Decl2()
+	elif(listaTokens[0] == 'PCOMMA'):
+		match('PCOMMA')	
+	elif(listaTokens[0] == 'ATTR'):
+		match('ATTR')
+		Expressao()
+		Decl2()	
 
-def Comando(object.listaTokens,i):
-	if(object.listaTokens[i] == 'LBRACE'):
-		i = Bloco(object.listaTokens,i)
-		i = i + 1
-		return i
-	elif(object.listaTokens[i] == 'ID'):
-		i = Atribuicao(object.listaTokens,i)
-		i = i + 1
-		return i
-	elif(object.listaTokens[i] == 'IF'):
-		i = ComandoSe(object.listaTokens,i)
-		i = i + 1	
-		return i
-	elif(object.listaTokens[i] == 'WHILE'):
-		i = ComandoEnquanto(object.listaTokens,i)
-		i = i + 1
-		return i
-	elif(object.listaTokens[i] == 'READ'):
-		i = ComandoRead(object.listaTokens,i)
-		i = i + 1
-		return i
-	elif(object.listaTokens[i] == 'PRINT'):
-		i = ComandoPrint(object.listaTokens,i)
-		i = i + 1
-		return i
+def Tipo():
+	if(listaTokens[0] == 'INT'):
+		match('INT')
+	elif(listaTokens[0] == 'FLOAT'):
+		match('FLOAT')
 
-def Bloco(object.listaTokens,i):
-	if(object.listaTokens[i] == 'LBRACE'):
-		i = Decl_Comando(object.listaTokens,i);
-		i = i + 1;
-		if(object.listaTokens[i] == 'RBRACE'):
-			return i
-		else:
-			return i+1
-			print error('bloco')
+def Comando():
+	if(listaTokens[0] == 'LBRACE'):
+		Bloco()
+	elif(listaTokens[0] == 'ID'):
+		Atribuicao()
+	elif(listaTokens[0] == 'IF'):
+		ComandoSe()
+	elif(listaTokens[0] == 'WHILE'):
+		ComandoEnquanto()
+	elif(listaTokens[0] == 'READ'):
+		ComandoRead()
+	elif(listaTokens[0] == 'PRINT'):
+		ComandoPrint()
 
-def Atribuicao(object.listaTokens,i):
-	if(object.listaTokens[i] == 'ID'):
-		if(object.listaTokens[i+1] == 'ATTR'):
-			i = Expressao(object.listaTokens,i);
-			i = i + 1
-			if(object.listaTokens[i] == 'PCOMMA'):
-				return i
-			else:
-				return i+1
-				print error('atribuicao')	
+def Bloco():
+	match('LBRACE')
+	Comandos()
+	match('RBRACE')
 
-def OpRel(object.listaTokens,i):
-	if(object.listaTokens[i] == 'LT' or object.listaTokens[i] == 'LE' or object.listaTokens[i] == 'GT' or object.listaTokens[i] == 'GE'):
-		i = i + 1
-		return i
-	else: 
-		return i
-		print error('OpRel')
+def Atribuicao():
+	match('ID')
+	match('ATTR')
+	Expressao()
+	match('PCOMMA')
 
-def OpAdicao(object.listaTokens,i):
-	if(object.listaTokens[i] == 'PLUS' or object.listaTokens[i] == 'MINUS'):
-		i = i + 1
-		return i
-	else: 
-		return i
-		print error('OpAdicao')
+def OpRel():
+	if(listaTokens[0] == 'LT' ):
+		match('LT')
+	elif(listaTokens[0] == 'LE') :
+		match('LE')		
+	elif(listaTokens[0] == 'GT'):
+		match('GT')		
+	elif(listaTokens[0] == 'GE'):
+		match('GE')
 
-def OpMult(object.listaTokens,i):
-	if(object.listaTokens[i] == 'MULT' or object.listaTokens[i] == 'DIV'):
-		i = i + 1
-		return i
-	else: 
-		return i
-		print error('OpMult')
+def OpAdicao():
+	if(listaTokens[0] == 'PLUS'):
+		match('PLUS')
+	elif(listaTokens[0] == 'MINUS'):
+		match('MINUS')
 
-def OpIgual(object.listaTokens,i):
-	if(object.listaTokens[i] == 'EQ' or object.listaTokens[i] == 'NE'):
-		i = i + 1
-		return i
-	else: 
-		return i
-		print error('OpIgual')
 
-def ComandoRead(object.listaTokens,i):
-	if(object.listaTokens[i] == 'READ'):
-		i=i+1
-		if(object.listaTokens[i] == 'ID'):
-			i=i+1
-			if(object.listaTokens[i] == 'PCOMMA'):
-				i = i + 1
-				return i
+def OpMult():
+	if(listaTokens[0] == 'MULT'):
+		match('MULT')
+	elif(listaTokens[0] == 'DIV'):
+		match('DIV')
 
-			else:
-				return i
-				print error('ComandoRead')			
+def OpIgual():
+	if(listaTokens[0] == 'EQ'):
+		match('EQ')
+	elif(listaTokens[0] == 'NE'):
+		match('NE')
+	
 
-def ComandoSe(object.listaTokens,i):
-	if(object.listaTokens[i] == 'IF'):
-		i=i+1
-		if(object.listaTokens[i] == 'LBRACKET'):
-			i=i+1
-			i=Expressao(object.listaTokens,i)
-			#i=i+1
-			if(object.listaTokens[i] == 'RBRACKET'):
-				i=i+1
-				i = Comando(object.listaTokens,i)
-				#i=i+1
-				i = ComandoSenao(object.listaTokens,i)
-				return i
-			else: 
-				return i+1
-				print error('ComandoSe')	
+def ComandoRead():
+	match('READ')
+	match('ID')
+	match('PCOMMA')			
 
-def ComandoSenao(object.listaTokens,i):
-	if(object.listaTokens[i] == 'ELSE'):
-		i=i+1
-		i = Comando(object.listaTokens,i)
-		return i 
-	else: 
-		return i+1				
+def ComandoSe():
+	match('IF')
+	match('LBRACKET')
+	Expressao()
+	match('RBRACKET')
+	Comando()
+	ComandoSenao()	
 
-def ComandoEnquanto(object.listaTokens,i):
-	if(object.listaTokens[i] == 'WHILE'):
-		i=i+1
-		if(object.listaTokens[i] == 'LBRACKET'):
-			i=i+1
-			i = Expressao(object.listaTokens,i)
-			if(object.listaTokens[i] == 'RBRACKET'):
-				i = i + 1
-				i = Expressao(object.listaTokens,i)
-				return i
-			else:
-				return i + 1
-				print error('ComandoEnquanto')
+def ComandoSenao():
+	match('ELSE')
+	Comando()
 
-def ComandoPrint(object.listaTokens,i):
-	if(object.listaTokens[i] == 'PRINT'):
-		i=i+1
-		if(object.listaTokens[i] == 'LBRACKET'):
-			i=i+1
-			i = Expressao(object.listaTokens,i)
-			if(object.listaTokens[i] == 'RBRACKET'):
-				i=i+1
-				if(object.listaTokens[i] == 'PCOMMA'):
-					i=i+1
-					return i
-	else:
-		return i+1
-		print error('ComandoPrint')		
+	return i 			
 
-def Expressao(object.listaTokens,i):
-	i = Conjuncao(object.listaTokens,i)
-	i = i + 1
-	i = ExpressaoOpc(object.listaTokens,i)
-	i = i + 1 
+def ComandoEnquanto():
+	match('WHILE')
+	match('LBRACKET')
+	Expressao()
+	match('RBRACKET')
+	Comando()
+
+def ComandoPrint():
+	match('PRINT')
+	match('LBRACKET')
+	Expressao()
+	match('RBRACKET')
+	match('PCOMMA')		
+
+def Expressao():
+	Conjuncao()
+	ExpressaoOpc()
+
+def ExpressaoOpc():
+	match('OR')
+	Conjuncao()
+	ExpressaoOpc()
+
 	return i
 
-def ExpressaoOpc(object.listaTokens,i):
-	if(object.listaTokens[i] == 'OR'):
-		i = i + 1
-		i = Conjuncao(object.listaTokens,i)
-		i = i + 1
-		i = ExpressaoOpc(object.listaTokens,i)
-		return i
-	else:	
-		return i + 1
+def Conjuncao():
+	Igualdade()
+	ConjuncaoOpc()
 
-def Conjuncao(object.listaTokens,i):
-	i = Igualdade(object.listaTokens,i)
-	i = i + 1
-	i = ConjuncaoOpc(object.listaTokens,i)
-	i = i + 1
+def ConjuncaoOpc():
+	match('AND')
+	Igualdade()
+	ConjuncaoOpc()
+
 	return i
 
-def ConjuncaoOpc(object.listaTokens,i):
-	if(object.listaTokens[i] == 'AND'):
-		i = i + 1
-		i = Igualdade(object.listaTokens,i)
-		i = i + 1
-		i = ConjuncaoOpc(object.listaTokens,i)
-		i = i + 1
-		return i
-	else: 
-		return i + 1
+def Igualdade():
+	Relacao()
+	IgualdadeOpc()
 
-def Igualdade(object.listaTokens,i):
-	i = Relacao(object.listaTokens,i)
-	i = i + 1
-	i = IgualdadeOpc(object.listaTokens,i)
-	i = i + 1
-	return i 
+def IgualdadeOpc():
+	OpIgual()
+	Relacao()
+	IgualdadeOpc()
 
-def IgualdadeOpc(object.listaTokens,i):
-	i = OpIgual(object.listaTokens,i)
-	i = i + 1
-	i = Relacao(object.listaTokens,i)
-	i = i + 1
-	i = RelacaoOpc(object.listaTokens,i)
-	i = i + 1
+def Relacao():
+	Adicao()
+	RelacaoOpc()
+
+def RelacaoOpc():
+	OpRel()
+	Adicao()
+	RelacaoOpc()
+
 	return i
 	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA
 
-def Relacao(object.listaTokens,i):
-	i = Adicao(object.listaTokens,i)
-	i = i + 1
-	i = RelacaoOpc(object.listaTokens,i)	
-	i = i + 1
-	return i 
+def Adicao():
+	Termo()
+	AdicaoOpc()
 
-def RelacaoOpc(object.listaTokens,i):
-	i = OpRel(object.listaTokens,i)
-	i = i + 1
-	i = Adicao(object.listaTokens,i)
-	i = i + 1
-	i = RelacaoOpc(object.listaTokens,i)
-	i = i + 1
-	return i
-	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA
+def AdicaoOpc():
+	OpAdicao()
+	Termo()
+	AdicaoOpc()
 
-def Adicao(object.listaTokens,i):
-	i = Termo(object.listaTokens,i)
-	i = i + 1
-	i = AdicaoOpc(object.listaTokens,i)
-	i = i + 1
-	return i
-
-def AdicaoOpc(object.listaTokens,i):
-	i = OpAdicao(object.listaTokens,i)
-	i = i + 1
-	i = Termo(object.listaTokens,i)
-	i = i + 1
-	i = AdicaoOpc(object.listaTokens,i)
-	i = i + 1
 	return i
 	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA	
 
-def Termo(object.listaTokens,i):
-	i = Fator(object.listaTokens,i)
-	i = i + 1
-	i = TermoOpc(object.listaTokens,i)
-	i = i + i
+def Termo():
+	Fator()
+	TermoOpc()
+
+def TermoOpc():
+	OpMult()
+	Fator()
+	TermoOpc()
+
 	return i
+	 
 
-def TermoOpc(object.listaTokens,i):
-	i = OpMult(object.listaTokens,i)
-	i = i + 1
-	i = Fator(object.listaTokens,i)
-	i = i + 1
-	i = TermoOpc(object.listaTokens,i)
-	i = i + 1
-	return i 
-	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR 
-
-def Fator(object.listaTokens,i):
-	if(object.listaTokens[i] == 'ID'):
-		i = i + 1
-	elif(object.listaTokens[i] == 'INTEGER_CONST'):
-		i = i + 1
-	elif(object.listaTokens[i] == 'FLOAT_CONST'):
-		i = i + 1
-	elif(object.listaTokens[i] == 'LBRACKET'):
-		i = i + 1
-		i = Expressao(object.listaTokens,i)
-		i = i + 1
-		if(object.listaTokens[i] == 'RBRACKET'):
-			i = i + 1
-			return i 
-		else:
-			return i + 1
-			print error('fator') """	
+def Fator():
+	if(listaTokens[0] == 'ID'):
+		match('ID')
+	elif(listaTokens[0] == 'INTEGER_CONST'):
+		match('INTEGER_CONST')
+	elif(listaTokens[0] == 'FLOAT_CONST'):
+		match('FLOAT_CONST')
+	elif(listaTokens[0] == 'LBRACKET'):
+		match('LBRACKET')
+		Expressao()
+		match('RBRACKET')	
+	
