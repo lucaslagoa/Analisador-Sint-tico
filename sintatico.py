@@ -27,7 +27,6 @@ def TabelaSimbolos():
 			while(listaTokens[i] != 'PCOMMA'):
 				if(listaTokens[i] == 'ID'):
 					dict[listaLexema[i]] = (tipo, 0)
-
 				if(listaTokens[i+1] == 'PCOMMA'):
 					dict2[listaLexema[i]] = (tipo, 0)
 					dict.update(dict2)
@@ -51,9 +50,9 @@ def TabelaSimbolos():
 
 def match(token):
 	if(listaTokens[0] == token):
+		print 'Entrada correta - ' , token
 		listaTokens.pop(0)
 		listaLexema.pop(0)
-		print 'Entrada correta'
 	else: 
 		print 'Erro sintatico'
 
@@ -65,7 +64,7 @@ def Programa():
 	match('LBRACE')
 	Decl_Comando();
 	match('RBRACE')
-		
+			
 				
 def Decl_Comando():  
     if (listaTokens[0] == 'INT' or listaTokens[0] == 'FLOAT'):   
@@ -77,8 +76,7 @@ def Decl_Comando():
        	Comando();
        	Decl_Comando();
 
-    else:
-        return i
+    #return i
 
 def Declaracao():
 	Tipo();
@@ -120,7 +118,7 @@ def Comando():
 
 def Bloco():
 	match('LBRACE')
-	Comandos()
+	Comando()
 	match('RBRACE')
 
 def Atribuicao():
@@ -129,35 +127,6 @@ def Atribuicao():
 	Expressao()
 	match('PCOMMA')
 
-def OpRel():
-	if(listaTokens[0] == 'LT' ):
-		match('LT')
-	elif(listaTokens[0] == 'LE') :
-		match('LE')		
-	elif(listaTokens[0] == 'GT'):
-		match('GT')		
-	elif(listaTokens[0] == 'GE'):
-		match('GE')
-
-def OpAdicao():
-	if(listaTokens[0] == 'PLUS'):
-		match('PLUS')
-	elif(listaTokens[0] == 'MINUS'):
-		match('MINUS')
-
-
-def OpMult():
-	if(listaTokens[0] == 'MULT'):
-		match('MULT')
-	elif(listaTokens[0] == 'DIV'):
-		match('DIV')
-
-def OpIgual():
-	if(listaTokens[0] == 'EQ'):
-		match('EQ')
-	elif(listaTokens[0] == 'NE'):
-		match('NE')
-	
 
 def ComandoRead():
 	match('READ')
@@ -223,6 +192,12 @@ def IgualdadeOpc():
 	Relacao()
 	IgualdadeOpc()
 
+def OpIgual():
+	if(listaTokens[0] == 'EQ'):
+		match('EQ')
+	elif(listaTokens[0] == 'NE'):
+		match('NE')	
+
 def Relacao():
 	Adicao()
 	RelacaoOpc()
@@ -234,6 +209,16 @@ def RelacaoOpc():
 
 	return i
 	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA
+
+def OpRel():
+	if(listaTokens[0] == 'LT' ):
+		match('LT')
+	elif(listaTokens[0] == 'LE') :
+		match('LE')		
+	elif(listaTokens[0] == 'GT'):
+		match('GT')		
+	elif(listaTokens[0] == 'GE'):
+		match('GE')
 
 def Adicao():
 	Termo()
@@ -247,6 +232,12 @@ def AdicaoOpc():
 	return i
 	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA	
 
+def OpAdicao():
+	if(listaTokens[0] == 'PLUS'):
+		match('PLUS')
+	elif(listaTokens[0] == 'MINUS'):
+		match('MINUS')
+
 def Termo():
 	Fator()
 	TermoOpc()
@@ -258,6 +249,11 @@ def TermoOpc():
 
 	return i
 	 
+def OpMult():
+	if(listaTokens[0] == 'MULT'):
+		match('MULT')
+	elif(listaTokens[0] == 'DIV'):
+		match('DIV')	 
 
 def Fator():
 	if(listaTokens[0] == 'ID'):
