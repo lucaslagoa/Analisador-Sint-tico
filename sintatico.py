@@ -13,6 +13,7 @@ object.run()
 
 listaTokens = object.listaTokens['tokens']
 listaLexema = object.listaTokens['lexema']
+listaLinhas = object.listaTokens['linhas']
 
 def TabelaSimbolos():
 	tamanho = len(listaTokens)
@@ -50,11 +51,13 @@ def TabelaSimbolos():
 
 def match(token):
 	if(listaTokens[0] == token):
-		print 'Entrada correta - ' , token
+		print 'Entrada correta -  ' , token , 'na linha: ' , listaLinhas[0]
 		listaTokens.pop(0)
 		listaLexema.pop(0)
+		listaLinhas.pop(0)
 	else: 
 		print 'Erro sintatico'
+		exit()
 
 def Programa():
 	match('INT')
@@ -76,7 +79,9 @@ def Decl_Comando():
        	Comando();
        	Decl_Comando();
 
-    #return i
+    else:
+    	return None
+
 
 def Declaracao():
 	Tipo();
@@ -142,10 +147,11 @@ def ComandoSe():
 	ComandoSenao()	
 
 def ComandoSenao():
-	match('ELSE')
-	Comando()
-
-	return i 			
+	if(listaTokens[0] == 'ELSE'):
+		match('ELSE')
+		Comando()
+	else :
+		return None
 
 def ComandoEnquanto():
 	match('WHILE')
@@ -166,31 +172,36 @@ def Expressao():
 	ExpressaoOpc()
 
 def ExpressaoOpc():
-	match('OR')
-	Conjuncao()
-	ExpressaoOpc()
-
-	return i
+	if(listaTokens[0] == 'OR'):
+		match('OR')
+		Conjuncao()
+		ExpressaoOpc()
+	else: 
+		return None
 
 def Conjuncao():
 	Igualdade()
 	ConjuncaoOpc()
 
 def ConjuncaoOpc():
-	match('AND')
-	Igualdade()
-	ConjuncaoOpc()
-
-	return i
+	if(listaTokens[0] == 'AND'):
+		match('AND')
+		Igualdade()
+		ConjuncaoOpc()
+	else :
+		return None
 
 def Igualdade():
 	Relacao()
 	IgualdadeOpc()
 
 def IgualdadeOpc():
-	OpIgual()
-	Relacao()
-	IgualdadeOpc()
+	if(listaTokens[0] == 'EQ' or listaTokens[0] == 'NE'):
+		OpIgual()
+		Relacao()
+		IgualdadeOpc()
+	else : 
+		return None
 
 def OpIgual():
 	if(listaTokens[0] == 'EQ'):
@@ -203,12 +214,14 @@ def Relacao():
 	RelacaoOpc()
 
 def RelacaoOpc():
-	OpRel()
-	Adicao()
-	RelacaoOpc()
+	if(listaTokens[0] == 'LT' or listaTokens[0] == 'LE' or listaTokens[0] == 'GT' or listaTokens[0] == 'GE'):
+		OpRel()
+		Adicao()
+		RelacaoOpc()
+	else : 
+		return None	
 
-	return i
-	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA
+	
 
 def OpRel():
 	if(listaTokens[0] == 'LT' ):
@@ -225,12 +238,13 @@ def Adicao():
 	AdicaoOpc()
 
 def AdicaoOpc():
-	OpAdicao()
-	Termo()
-	AdicaoOpc()
+	if(listaTokens[0] == 'PLUS' or listaTokens[0] == 'MINUS'):
+		OpAdicao()
+		Termo()
+		AdicaoOpc()
 
-	return i
-	#COLOCAR VAZIO AQUI NÃO SEI COMO COLOCAR AAAAA	
+	else: 
+		return None
 
 def OpAdicao():
 	if(listaTokens[0] == 'PLUS'):
@@ -243,11 +257,12 @@ def Termo():
 	TermoOpc()
 
 def TermoOpc():
-	OpMult()
-	Fator()
-	TermoOpc()
-
-	return i
+	if(listaTokens[0] == 'MULT' or listaTokens[0] == 'DIV'):
+		OpMult()
+		Fator()
+		TermoOpc()
+	else: 
+		return None	
 	 
 def OpMult():
 	if(listaTokens[0] == 'MULT'):

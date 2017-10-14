@@ -7,6 +7,6 @@ from sintatico import *
 print 'Tabela de Simbolos'
 TabelaSimbolos()
 
-while(1):
+while(len(listaTokens)>0):
 
 	Programa()
