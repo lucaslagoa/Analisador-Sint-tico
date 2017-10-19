@@ -388,8 +388,8 @@ def main():
 	lexico = Lexico()
 	lexico.run()
 
-	print "Lexemas \n", lexico.listaTokens['lexema'],'\n'
-	print "Linhas \n" , lexico.listaTokens['linhas'],'\n'
+	#print "Lexemas \n", lexico.listaTokens['lexema'],'\n'
+	#print "Linhas \n" , lexico.listaTokens['linhas'],'\n'
 	#print "Operadores \n", lexico.listaTokens['operadores1'],'\n'
 	#print "Separadores \n", lexico.listaTokens['separadores1'],'\n'
 	#print "Reservadas \n", lexico.listaTokens['reservadas1'],'\n'
@@ -397,7 +397,7 @@ def main():
 	#print "Float\n", lexico.listaTokens['float'], '\n'
 	#print "Identificadores\n", lexico.listaTokens['identificadores1'], '\n'
 	#print "Erros\n", lexico.listaTokens['erros'], '\n'
-	print "Tokens\n",lexico.listaTokens['tokens'],'\n'
+	#print "Tokens\n",lexico.listaTokens['tokens'],'\n'
 
 	#print "OCORRENCIAS:\n"
 	#for o in lexico.listaTokens['ocorrencias']:
