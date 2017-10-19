@@ -181,8 +181,7 @@ class Print(AST):
         print('Criando um nó do tipo Print.')
         self.children.append(exp)
         self.exp = exp;
-
-	def __init__(self,nome):
+    def __init__(self,nome):
 		AST.__init__(self, nome, None)	
 
     def __repr__(self):
@@ -430,11 +429,12 @@ def Decl2(lista):
 		match('COMMA')
 		match('ID')
 		return Decl2(lista)
-		
+		#OLHAR ISSO
 
 	elif(listaTokens[0] == 'PCOMMA'):
 		match('PCOMMA')	
 		return lista
+		#OLHAR ISSO
 
 	elif(listaTokens[0] == 'ATTR'):
 		match('ATTR')
@@ -492,9 +492,13 @@ def Atribuicao(lista):
 
 
 def ComandoRead(lista):
+	read_node = Read('READ')
 	match('READ')
+	id_node = Id(listaTokens[0],None)
+	read_node.children.append(id_node)
 	match('ID')
-	match('PCOMMA')			
+	match('PCOMMA')	
+	lista.children.append(read_node)		
 	return lista
 
 def ComandoSe(lista):
@@ -506,12 +510,9 @@ def ComandoSe(lista):
 	match('RBRACKET')
 	c_true = AST('C_TRUE',None)
 	retorno = Comando(c_true)
-	#print retorno, "-----"
 	ComandoSenao(retorno)
 	if_node.children.append(retorno)
-	#print "-----------",if_node
 	lista.children.append(if_node)
-	#print "--------------------",lista
 	return lista
 
 def ComandoSenao(if_node):
@@ -538,11 +539,14 @@ def ComandoEnquanto(lista):
 	return lista
 
 def ComandoPrint(lista):
+	print_node = Print('PRINT')
 	match('PRINT')
 	match('LBRACKET')
-	Expressao()
+	expr = Expressao()
+	print_node.children.append(expr)
 	match('RBRACKET')
-	match('PCOMMA')		
+	match('PCOMMA')	
+	lista.children.append(print_node)	
 	return lista
 
 
@@ -553,21 +557,25 @@ def Expressao(): #expressao
 def ExpressaoOpc(expr):
 	if(listaTokens[0] == 'OR'):
 		match('OR')
-		expr2 = Conjuncao()
-		return ExpressaoOpc(expr2)
+		expr1 = Conjuncao()
+		expr2 = ExpressaoOpc(expr1)
+		or_node = LogicalOp(expr1,'||',expr2,None)
+		return or_node
 	else: 
 		return expr
 
 def Conjuncao():
 	expr = Igualdade()
 	return ConjuncaoOpc(expr)
-	#todo opc precisa de parametro
+
 
 def ConjuncaoOpc(expr):
 	if(listaTokens[0] == 'AND'):
 		match('AND')
-		expr2 = Igualdade()
-		return ConjuncaoOpc(expr2)
+		expr1= Igualdade()
+		expr2 = ConjuncaoOpc(expr1)
+		and_node = LogicalOp(expr1,'&&',expr2,None)
+		return and_node
 	else :
 		return expr
 
@@ -576,10 +584,18 @@ def Igualdade():
 	return IgualdadeOpc(expr)
 
 def IgualdadeOpc(expr):
-	if(listaTokens[0] == 'EQ' or listaTokens[0] == 'NE'):
+	if(listaTokens[0] == 'EQ'):
 		OpIgual()
 		expr2 = Relacao()
-		return IgualdadeOpc(expr2)
+		igual_node = RelOp(expr,'==',expr2,None)
+		return IgualdadeOpc(igual_node)
+
+	elif(listaTokens[0] == 'NE'):
+		OpIgual()
+		expr2 = Relacao()
+		diferente_node = RelOp(expr,'!=',expr2,None)
+		return IgualdadeOpc(diferente_node)
+
 	else : 
 		return expr
 
@@ -594,10 +610,26 @@ def Relacao():
 	return RelacaoOpc(expr)
 
 def RelacaoOpc(expr):
-	if(listaTokens[0] == 'LT' or listaTokens[0] == 'LE' or listaTokens[0] == 'GT' or listaTokens[0] == 'GE'):
+	if(listaTokens[0] == 'LT'):
 		OpRel()
 		expr2 = Adicao()
-		return RelacaoOpc(expr2)
+		menor_node = RelOp(expr,'<',expr2,None)
+		return RelacaoOpc(menor_node)
+	elif(listaTokens[0] == 'LE'):
+		OpRel()
+		expr2 = Adicao()
+		menorigual_node = RelOp(expr,'<=',expr2,None)
+		return RelacaoOpc(menorigual_node)
+	elif(listaTokens[0] == 'GT'):
+		OpRel()
+		expr2 = Adicao()
+		maior_node = RelOp(expr,'>',expr2,None)
+		return RelacaoOpc(maior_node)
+	elif(listaTokens[0] == 'GE'):
+		OpRel()
+		expr2 = Adicao()
+		maiorigual_node = RelOp(expr,'>=',expr2,None)
+		return RelacaoOpc(maiorigual_node)
 	else : 
 		return expr	
 
@@ -629,8 +661,8 @@ def AdicaoOpc(expr):
 
 		OpAdicao()
 		expr2 = Termo()
-		plus_node = ArithOp(expr,'-',expr2,None)
-		return AdicaoOpc(plus_node)
+		minus_node = ArithOp(expr,'-',expr2,None)
+		return AdicaoOpc(minus_node)
 
 	else: 
 		return expr
@@ -646,10 +678,17 @@ def Termo():
 	return TermoOpc(expr)
 
 def TermoOpc(expr):
-	if(listaTokens[0] == 'MULT' or listaTokens[0] == 'DIV'):
+	if(listaTokens[0] == 'MULT'):
 		OpMult()
 		expr2 = Fator()
-		return TermoOpc(expr2)
+		mult_node = ArithOp(expr,'*',expr2,None)
+		return TermoOpc(mult_node)
+
+	elif(listaTokens[0] == 'DIV'):
+		OpMult()
+		expr2 = Fator()
+		div_node = ArithOp(expr,'/',expr2,None)
+		return TermoOpc(div_node)	
 	else: 
 		return expr	
 	 
