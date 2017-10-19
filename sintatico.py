@@ -15,6 +15,11 @@ listaTokens = object.listaTokens['tokens']
 listaLexema = object.listaTokens['lexema']
 listaLinhas = object.listaTokens['linhas']
 
+id_node = None
+
+int_type = 0
+float_type = 1
+
 class AST():
     def __init__(self, nome, father):
          self.nome = nome;
@@ -139,6 +144,9 @@ class If(AST):
         self.c_true = c_true; 
         self.c_false = c_false; 
     
+    def __init__(self,nome):
+    	AST.__init__(self, nome, None)
+    	
     def __repr__(self):
         return self.nome
     
@@ -150,6 +158,9 @@ class While(AST):
         self.children.append(commands)
         self.exp = exp;
         self.commands = commands; 
+    def __init__(self,nome):
+    	AST.__init__(self, nome, None)
+
     def __repr__(self):
         return self.nome
         
@@ -159,6 +170,8 @@ class Read(AST):
         print('Criando um nó do tipo Read.')
         self.children.append(id_)
         self.id = id_;
+    def __init__(self,nome):
+    	AST.__init__(self, nome, None)    
     def __repr__(self):
         return self.nome
     
@@ -167,7 +180,11 @@ class Print(AST):
         AST.__init__(self,'Print', father)
         print('Criando um nó do tipo Print.')
         self.children.append(exp)
-        self.exp = exp; 
+        self.exp = exp;
+
+	def __init__(self,nome):
+		AST.__init__(self, nome, None)	
+
     def __repr__(self):
         return self.nome
 
@@ -250,7 +267,7 @@ class Id(AST):
     
     def __repr__(self):
         #return repr(self.token)
-        return self.token.lexema
+        return self.token
     
     def __evaluate__(self):
         te = tabSimbolos.getEntry(self.token.lexema)
@@ -270,7 +287,7 @@ class Num(AST):
         print('Criando um nó do tipo Num.')
         #self.children.append(token)   
         self.token = token
-        self.value = token.lexema  #em python, não precisamos nos preocupar com o tipo de value 
+        self.value = token #em python, não precisamos nos preocupar com o tipo de value 
         self.tipo = tipo
         
     def __repr__(self):
@@ -378,19 +395,19 @@ def Programa():
 	match('RBRACKET')
 	match('LBRACE')
 	lista = AST('decl_comando', None)    
-    ast = Decl_Comando(lista);
-	match('RBRACE')	
+   	ast = Decl_Comando(lista);
+	match('RBRACE')
+	print ast
 				
 def Decl_Comando(lista):  
     if (listaTokens[0] == 'INT' or listaTokens[0] == 'FLOAT'):   
-        lista = Declaracao(lista); 
-        lista = Decl_Comando(lista);
-        return lista
-
+        lista1 = Declaracao(lista); 
+        return Decl_Comando(lista1);
+       
     elif (listaTokens[0] == 'ID' or listaTokens[0] == 'IF' or listaTokens[0] == 'WHILE' or listaTokens[0] == 'PRINT' 
           or listaTokens[0] == 'READ' or listaTokens[0] == 'LBRACE'):
-       	lista = Comando(lista);
-       	return Decl_Comando(lista);
+       	lista1 = Comando(lista);
+       	return Decl_Comando(lista1);
 
     else:
     	return lista
@@ -398,23 +415,28 @@ def Decl_Comando(lista):
 
 
 def Declaracao(lista):
+	global id_node
 	Tipo();
-	match('ID')
-	Decl2(lista);
+	if(listaTokens[0] == 'ID'):
+		id_node = Id(listaTokens[0],None)
+		match('ID')
+
+	return Decl2(lista);
 
 
 def Decl2(lista):
+	global id_node
 	if(listaTokens[0] == 'COMMA'):
 		match('COMMA')
 		match('ID')
-		Decl2(lista)
+		return Decl2(lista)
+		
 
 	elif(listaTokens[0] == 'PCOMMA'):
 		match('PCOMMA')	
 		return lista
 
 	elif(listaTokens[0] == 'ATTR'):
-		id_node = Id(listaTokens[0],None)
 		match('ATTR')
 		expr_node = Expressao()
 		attr_node = Assign(id_node,'=',expr_node,None)
@@ -433,33 +455,34 @@ def Tipo():
 
 def Comando(lista):
 	if(listaTokens[0] == 'LBRACE'):
-		bloco = AST('Bloco',None)
-		Bloco()
+		return Bloco(lista)
+
 	elif(listaTokens[0] == 'ID'):
-		id_node = Id(listaTokens[0],None)
 		#tabela de simbolos
-		Atribuicao()
-	#Outra forma de fazer é criar: bloco = AST('Bloco', None); bloco.children.append(lista); return bloco;		
+		return Atribuicao(lista)
 
 	elif(listaTokens[0] == 'IF'):
-		if_node = AST('IF',None)
-		ComandoSe()
+		return ComandoSe(lista)
 	elif(listaTokens[0] == 'WHILE'):
-		while_node = AST('WHILE',None)
-		ComandoEnquanto()
+		return ComandoEnquanto(lista)
 	elif(listaTokens[0] == 'READ'):
-		ComandoRead()
+		return ComandoRead(lista)
 	elif(listaTokens[0] == 'PRINT'):
-		ComandoPrint()
+		return ComandoPrint(lista)
 
 #BLOCO, EXPRESSAO
 
-def Bloco():
+def Bloco(lista):
+	bloco = AST('Bloco',None)
 	match('LBRACE')
-	Comando(lista)
-	match('RBRACE')
+	retorno = Decl_Comando(bloco)
+	match('RBRACE')	
+	lista.children.append(retorno)
 
-def Atribuicao():
+	return lista
+
+def Atribuicao(lista):
+	id_node = Id(listaTokens[0],None)
 	match('ID')
 	match('ATTR')
 	expr_node = Expressao()
@@ -468,32 +491,41 @@ def Atribuicao():
 	return lista
 
 
-def ComandoRead():
+def ComandoRead(lista):
 	match('READ')
 	match('ID')
 	match('PCOMMA')			
+	return lista
 
-def ComandoSe():
+def ComandoSe(lista):
+	if_node = If('IF')
 	match('IF')
 	match('LBRACKET')
 	expr_node = Expressao()
 	if_node.children.append(expr_node)
 	match('RBRACKET')
 	c_true = AST('C_TRUE',None)
-	if_node.children.append(c_true)
-	Comando(c_true)
-	ComandoSenao()
+	retorno = Comando(c_true)
+	#print retorno, "-----"
+	ComandoSenao(retorno)
+	if_node.children.append(retorno)
+	#print "-----------",if_node
+	lista.children.append(if_node)
+	#print "--------------------",lista
+	return lista
 
-def ComandoSenao():
+def ComandoSenao(if_node):
 	if(listaTokens[0] == 'ELSE'):
-		match('ELSE')
 		c_false = AST('C_FALSE',None)
-		if_node.children.append(c_false)
-		Comando(c_false)
+		match('ELSE')
+		retorno = Comando(c_false)
+		if_node.children.append(retorno)
+		return if_node
 	else :
 		return if_node
 
-def ComandoEnquanto():
+def ComandoEnquanto(lista):
+	while_node = While('WHILE')
 	match('WHILE')
 	match('LBRACKET')
 	expr_node = Expressao()
@@ -501,66 +533,55 @@ def ComandoEnquanto():
 	match('RBRACKET')
 	c_true = AST('C_TRUE',None)
 	while_node.children.append(c_true)
-	Comando(c_true)
-	return while_node
+	retorno = Comando(c_true)
+	lista.children.append(retorno)
+	return lista
 
-def ComandoPrint():
+def ComandoPrint(lista):
 	match('PRINT')
 	match('LBRACKET')
 	Expressao()
 	match('RBRACKET')
 	match('PCOMMA')		
+	return lista
 
-def Expressao(): #expressao
-    global token, tabSimbolos, currentType, currentTableEntry, currentToken;    
-    #ast_node = AST('ast_node', None)
-    if (token.type == ID or token.type == INTEGER_CONST or 
-        token.type == FLOAT_CONST or token.type == LBRACKET):        
-        expr1 = T();
-        expr2 = E_(expr1);
-        if(expr2 != None):                    
-            #ast_node.children.append(expr2)
-            return expr2
-        else:             
-            #ast_node.children.append(expr1)
-            return expr1   
 
-def Expressao():
-	Conjuncao()
-	ExpressaoOpc()
+def Expressao(): #expressao        
+    expr = Conjuncao();
+    return ExpressaoOpc(expr);
 
-def ExpressaoOpc():
+def ExpressaoOpc(expr):
 	if(listaTokens[0] == 'OR'):
 		match('OR')
-		Conjuncao()
-		ExpressaoOpc()
+		expr2 = Conjuncao()
+		return ExpressaoOpc(expr2)
 	else: 
-		return None
+		return expr
 
 def Conjuncao():
-	Igualdade()
-	ConjuncaoOpc()
+	expr = Igualdade()
+	return ConjuncaoOpc(expr)
 	#todo opc precisa de parametro
 
-def ConjuncaoOpc():
+def ConjuncaoOpc(expr):
 	if(listaTokens[0] == 'AND'):
 		match('AND')
-		Igualdade()
-		ConjuncaoOpc()
+		expr2 = Igualdade()
+		return ConjuncaoOpc(expr2)
 	else :
-		return None
+		return expr
 
 def Igualdade():
-	Relacao()
-	IgualdadeOpc()
+	expr = Relacao()
+	return IgualdadeOpc(expr)
 
-def IgualdadeOpc():
+def IgualdadeOpc(expr):
 	if(listaTokens[0] == 'EQ' or listaTokens[0] == 'NE'):
 		OpIgual()
-		Relacao()
-		IgualdadeOpc()
+		expr2 = Relacao()
+		return IgualdadeOpc(expr2)
 	else : 
-		return None
+		return expr
 
 def OpIgual():
 	if(listaTokens[0] == 'EQ'):
@@ -569,16 +590,16 @@ def OpIgual():
 		match('NE')	
 
 def Relacao():
-	Adicao()
-	RelacaoOpc()
+	expr = Adicao()
+	return RelacaoOpc(expr)
 
-def RelacaoOpc():
+def RelacaoOpc(expr):
 	if(listaTokens[0] == 'LT' or listaTokens[0] == 'LE' or listaTokens[0] == 'GT' or listaTokens[0] == 'GE'):
 		OpRel()
-		Adicao()
-		RelacaoOpc()
+		expr2 = Adicao()
+		return RelacaoOpc(expr2)
 	else : 
-		return None	
+		return expr	
 
 	
 
@@ -593,17 +614,26 @@ def OpRel():
 		match('GE')
 
 def Adicao():
-	Termo()
-	AdicaoOpc()
+	expr = Termo()
+	return AdicaoOpc(expr)
 
-def AdicaoOpc():
-	if(listaTokens[0] == 'PLUS' or listaTokens[0] == 'MINUS'):
+def AdicaoOpc(expr):
+	if(listaTokens[0] == 'PLUS'):
+
 		OpAdicao()
-		Termo()
-		AdicaoOpc()
+		expr2 = Termo()
+		plus_node = ArithOp(expr,'+',expr2,None)
+		return AdicaoOpc(plus_node)
+
+	elif(listaTokens[0] == 'MINUS'):
+
+		OpAdicao()
+		expr2 = Termo()
+		plus_node = ArithOp(expr,'-',expr2,None)
+		return AdicaoOpc(plus_node)
 
 	else: 
-		return None
+		return expr
 
 def OpAdicao():
 	if(listaTokens[0] == 'PLUS'):
@@ -612,16 +642,16 @@ def OpAdicao():
 		match('MINUS')
 
 def Termo():
-	Fator()
-	TermoOpc()
+	expr = Fator()
+	return TermoOpc(expr)
 
-def TermoOpc():
+def TermoOpc(expr):
 	if(listaTokens[0] == 'MULT' or listaTokens[0] == 'DIV'):
 		OpMult()
-		Fator()
-		TermoOpc()
+		expr2 = Fator()
+		return TermoOpc(expr2)
 	else: 
-		return None	
+		return expr	
 	 
 def OpMult():
 	if(listaTokens[0] == 'MULT'):
