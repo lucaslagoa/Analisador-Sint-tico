@@ -20,7 +20,7 @@ id_node = None
 int_type = 0
 float_type = 1
 dicionario = {}
-batataFrita = []
+
 
 class AST(object):
     def __init__(self, nome, father):
@@ -104,12 +104,16 @@ class Assign(AST):
         print('Avaliando atribuição.')        
         id_node = self.children[0]
         lex = id_node.lexema
-        te = dicionario[id_node.lexema][1]
-        expr_value = self.children[1].__evaluate__() 
-        tipo = dicionario[id_node.lexema][0]
+        print "teste 1 - lex: " , lex
+        te = dicionario[lex][1]
+        print "teste 2 - te : " , te
+        tipo = dicionario[lex][0]
         dict3 = {}
+        expr_value = self.children[1].__evaluate__()
+        print "teste 3, expr_value : " , expr_value
         dict3[id_node.lexema] = (tipo, expr_value)
         dicionario.update(dict3)
+        print "teste 4, dicionario:" , dicionario
   
        	
     
@@ -154,13 +158,14 @@ class If(AST):
         return self.nome
 
     def __evaluate__(self):
+    	print('Avaliando If.')
         valor = self.children[0].__evaluate__()
         print valor
         if(valor == True):
             self.children[1].__evaluate__()
         else:
-            if(len(self.children) is not 2):
-                self.children[2].__evaluate__()    
+        	if(len(self.children) is not 2):
+        		self.children[2].__evaluate__()    
 
 class While(AST):
     def __init__(self, exp, commands, father):
@@ -177,14 +182,14 @@ class While(AST):
         return self.nome
 
     def __evaluate__(self):
+    	print('Avaliando While.')
         valor = self.children[0].__evaluate__()
         while(valor == True):
         	self.children[1].__evaluate__()
         	if (self.children[1].__evaluate__() == True):
         		valor = self.children[0].__evaluate__()
         	else:
-        		valor = False 	
-
+        		valor = False		
 
         
 class Read(AST):
@@ -252,6 +257,7 @@ class LogicalOp(BinOp):
         BinOp.__init__(self,'LogicalOp',left, op, right, father)
         print('Criando um nó do tipo LogicalOp com operador ' + str(op))
     def __evaluate__(self):
+    	print('Avaliando LogicalOp.')
     	a = self.children[0].__evaluate__()
         b = self.children[1].__evaluate__()
     	if(self.op == '&&'):
@@ -452,17 +458,16 @@ def TabelaSimbolos():
 					if(listaTokens[i+1] == 'PCOMMA'):
 						dict2[listaLexema[i]] = (tipo, 0)
 						dicionario.update(dict2)
-					elif((listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'INTEGER_CONST') or (listaTokens[i+1] == 'ATTR' or listaTokens[i+2] == 'FLOAT_CONST')):
+					if(listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'ID'):
+						dict2[listaLexema[i]] = (tipo, 0)
+						dicionario.update(dict2)	
+					if((listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'INTEGER_CONST') or (listaTokens[i+1] == 'ATTR' or listaTokens[i+2] == 'FLOAT_CONST')):
 						dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
 						dicionario.update(dict2)
-				elif(listaTokens[i] == 'ID' and listaTokens[i+1] == 'COMMA'):
-					dict2[listaLexema[i]] = (tipo, 0)
-					dicionario.update(dict2)
-				elif((listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'INTEGER_CONST') or (listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'FLOAT_CONST')):
-					dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
-					dicionario.update(dict2)
-					i = i + 2
-				
+					if(listaTokens[i+1] == 'COMMA'):
+						dict2[listaLexema[i]] = (tipo, 0)
+						dicionario.update(dict2)
+								
 				i=i+1
 	print dicionario
 	return dicionario
@@ -476,7 +481,6 @@ def match(token):
 		listaLinhas.pop(0)
 	else: 
 		print 'Erro sintatico'
-		#exit()
 
 def Programa():
 	match('INT')
@@ -487,30 +491,24 @@ def Programa():
 	lista = AST('decl_comando', None)    
    	ast = Decl_Comando(lista);
 	match('RBRACE')
-	print ast
 	return ast
 				
 def Decl_Comando(lista):  
     if (listaTokens[0] == 'INT' or listaTokens[0] == 'FLOAT'):   
         lista1 = Declaracao(lista); 
-        return Decl_Comando(lista1);
-       
+        return Decl_Comando(lista1);      
     elif (listaTokens[0] == 'ID' or listaTokens[0] == 'IF' or listaTokens[0] == 'WHILE' or listaTokens[0] == 'PRINT' 
           or listaTokens[0] == 'READ' or listaTokens[0] == 'LBRACE'):
        	lista1 = Comando(lista);
        	return Decl_Comando(lista1);
-
     else:
     	return lista
     	
-
-
 def Declaracao(lista):
 	global id_node
 	Tipo();
 	if(listaTokens[0] == 'ID'):
 		id_node = Id(listaTokens[0],listaLexema[0],None)
-		#mudaTabela()
 		match('ID')
 
 	return Decl2(lista);
