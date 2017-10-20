@@ -441,28 +441,32 @@ def TabelaSimbolos():
 	tipo = []
 	dict2 = {}
 	for i in range(0,tamanho): 
-		if((listaTokens[i] == 'INT' or listaTokens[i] == 'FLOAT') and listaTokens[i+1] == 'ID'):
+		if((listaTokens[i] == 'INT' and listaTokens[i+1] == 'ID') or (listaTokens[i] == 'FLOAT' and listaTokens[i+1] == 'ID')):
 			tipo = []
 			tipo.append(listaTokens[i])
 			i = i+1
 			while(listaTokens[i] != 'PCOMMA'):
 				if(listaTokens[i] == 'ID'):
-					dicionario[listaLexema[i]] = (tipo, 0)
-				if(listaTokens[i+1] == 'PCOMMA'):
 					dict2[listaLexema[i]] = (tipo, 0)
 					dicionario.update(dict2)
-				elif(listaTokens[i+1] == 'COMMA'):
+					if(listaTokens[i+1] == 'PCOMMA'):
+						dict2[listaLexema[i]] = (tipo, 0)
+						dicionario.update(dict2)
+					elif((listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'INTEGER_CONST') or (listaTokens[i+1] == 'ATTR' or listaTokens[i+2] == 'FLOAT_CONST')):
+						dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
+						dicionario.update(dict2)
+				elif(listaTokens[i] == 'ID' and listaTokens[i+1] == 'COMMA'):
 					dict2[listaLexema[i]] = (tipo, 0)
 					dicionario.update(dict2)
-				elif(listaTokens[i+2] == 'INTEGER_CONST' or listaTokens[i+2] == 'FLOAT_CONST'):
+				elif((listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'INTEGER_CONST') or (listaTokens[i+1] == 'ATTR' and listaTokens[i+2] == 'FLOAT_CONST')):
 					dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
 					dicionario.update(dict2)
 					i = i + 2
-				else:
-					dicionario[listaLexema[i]] = (tipo, 0)
+				
 				i=i+1
 	print dicionario
 	return dicionario
+
 
 def match(token):
 	if(listaTokens[0] == token):
