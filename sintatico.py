@@ -19,6 +19,7 @@ id_node = None
 
 int_type = 0
 float_type = 1
+dicionario = {}
 
 class AST():
     def __init__(self, nome, father):
@@ -346,7 +347,6 @@ def print_tree(current_node, indent="", last='updown'):
 def TabelaSimbolos():
 	tamanho = len(listaTokens)
 	tipo = []
-	dict = {}
 	dict2 = {}
 	for i in range(0,tamanho): 
 		if((listaTokens[i] == 'INT' or listaTokens[i] == 'FLOAT') and listaTokens[i+1] == 'ID'):
@@ -355,27 +355,27 @@ def TabelaSimbolos():
 			i = i+1
 			while(listaTokens[i] != 'PCOMMA'):
 				if(listaTokens[i] == 'ID'):
-					dict[listaLexema[i]] = (tipo, 0)
+					dicionario[listaLexema[i]] = (tipo, 0)
 				if(listaTokens[i+1] == 'PCOMMA'):
 					dict2[listaLexema[i]] = (tipo, 0)
-					dict.update(dict2)
+					dicionario.update(dict2)
 				elif(listaTokens[i+1] == 'COMMA'):
 					dict2[listaLexema[i]] = (tipo, 0)
-					dict.update(dict2)
+					dicionario.update(dict2)
 				elif(listaTokens[i+1] == 'ATTR'):
 					if(listaTokens[i+3] == ('PLUS' or 'MINUS' or 'DIV' or 'MULT')):
-						dict[listaLexema[i]] = (tipo, 0)
+						dicionario[listaLexema[i]] = (tipo, 0)
 						i=i+3
 
 					elif(listaTokens[i+2] == 'INTEGER_CONST' or listaTokens[i+2] == 'FLOAT_CONST'):
 						dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
-						dict.update(dict2)
+						dicionario.update(dict2)
 						i = i + 2
 					else:
-						dict[listaLexema[i]] = (tipo, 0)
+						dicionario[listaLexema[i]] = (tipo, 0)
 				i=i+1
-	print dict
-
+	print dicionario
+	return dicionario
 
 def match(token):
 	if(listaTokens[0] == token):
@@ -418,18 +418,23 @@ def Declaracao(lista):
 	Tipo();
 	if(listaTokens[0] == 'ID'):
 		id_node = Id(listaTokens[0],None)
+		#mudaTabela()
 		match('ID')
 
 	return Decl2(lista);
 
+def mudaTabela():
+	valor = dicionario[listaLexema[0]][1]
+	print "------------------", valor
 
 def Decl2(lista):
 	global id_node
+
 	if(listaTokens[0] == 'COMMA'):
 		match('COMMA')
 		match('ID')
 		return Decl2(lista)
-		#OLHAR ISSO
+		#OLHAR ISSO - TABELA DE SIMBOLOS
 
 	elif(listaTokens[0] == 'PCOMMA'):
 		match('PCOMMA')	
@@ -470,8 +475,6 @@ def Comando(lista):
 	elif(listaTokens[0] == 'PRINT'):
 		return ComandoPrint(lista)
 
-#BLOCO, EXPRESSAO
-
 def Bloco(lista):
 	bloco = AST('Bloco',None)
 	match('LBRACE')
@@ -510,8 +513,8 @@ def ComandoSe(lista):
 	match('RBRACKET')
 	c_true = AST('C_TRUE',None)
 	retorno = Comando(c_true)
-	ComandoSenao(retorno)
 	if_node.children.append(retorno)
+	ComandoSenao(if_node)	
 	lista.children.append(if_node)
 	return lista
 
@@ -533,9 +536,9 @@ def ComandoEnquanto(lista):
 	while_node.children.append(expr_node)
 	match('RBRACKET')
 	c_true = AST('C_TRUE',None)
-	while_node.children.append(c_true)
 	retorno = Comando(c_true)
-	lista.children.append(retorno)
+	while_node.children.append(retorno)
+	lista.children.append(while_node)
 	return lista
 
 def ComandoPrint(lista):
@@ -557,10 +560,10 @@ def Expressao(): #expressao
 def ExpressaoOpc(expr):
 	if(listaTokens[0] == 'OR'):
 		match('OR')
-		expr1 = Conjuncao()
-		expr2 = ExpressaoOpc(expr1)
-		or_node = LogicalOp(expr1,'||',expr2,None)
-		return or_node
+		expr2 = Conjuncao()
+		or_node = LogicalOp(expr,'||',expr2,None)
+		expr2 = ExpressaoOpc(or_node)		
+		return expr2
 	else: 
 		return expr
 
@@ -572,10 +575,10 @@ def Conjuncao():
 def ConjuncaoOpc(expr):
 	if(listaTokens[0] == 'AND'):
 		match('AND')
-		expr1= Igualdade()
-		expr2 = ConjuncaoOpc(expr1)
-		and_node = LogicalOp(expr1,'&&',expr2,None)
-		return and_node
+		expr2= Igualdade()
+		and_node = LogicalOp(expr,'&&',expr2,None)
+		expr2 = ConjuncaoOpc(and_node)		
+		return expr2
 	else :
 		return expr
 
@@ -651,14 +654,12 @@ def Adicao():
 
 def AdicaoOpc(expr):
 	if(listaTokens[0] == 'PLUS'):
-
 		OpAdicao()
 		expr2 = Termo()
 		plus_node = ArithOp(expr,'+',expr2,None)
 		return AdicaoOpc(plus_node)
 
 	elif(listaTokens[0] == 'MINUS'):
-
 		OpAdicao()
 		expr2 = Termo()
 		minus_node = ArithOp(expr,'-',expr2,None)
