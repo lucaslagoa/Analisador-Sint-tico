@@ -6,22 +6,23 @@ import re
 from analex import *
 import hashlib
 
-object = Lexico()
+object1 = Lexico()
 
-object.run()
+object1.run()
 
 
-listaTokens = object.listaTokens['tokens']
-listaLexema = object.listaTokens['lexema']
-listaLinhas = object.listaTokens['linhas']
+listaTokens = object1.listaTokens['tokens']
+listaLexema = object1.listaTokens['lexema']
+listaLinhas = object1.listaTokens['linhas']
 
 id_node = None
 
 int_type = 0
 float_type = 1
 dicionario = {}
+batataFrita = []
 
-class AST():
+class AST(object):
     def __init__(self, nome, father):
          self.nome = nome;
          self.children = []
@@ -45,7 +46,9 @@ class AST():
         print('Avaliando nó ' + str(self.nome))
         for child in self.children:
             if (child != None): 
-                child.__evaluate__()
+                x = child.__evaluate__()
+
+
         
     def __checkTypes__(self):  
         for child in self.children:
@@ -100,16 +103,15 @@ class Assign(AST):
     def __evaluate__(self):
         print('Avaliando atribuição.')        
         id_node = self.children[0]
-        lex = id_node.token.lexema
-        print('Lexema do lado esquerdo: ' + str(lex))
-        #Consulta a entrada da tabela de símbolos para esse id 
-        te = tabSimbolos.getEntry(lex)
-        expr_value = self.children[1].__evaluate__()        
-        #print('Valor da expressão no lado direito ' + str(expr_value))
-        te.setRefValor(expr_value)
-        id_node.value = expr_value   
-        print('Valor do lexema ' + str(lex) +  ': ' + str(expr_value))
-        return te.ref_valor
+        lex = id_node.lexema
+        te = dicionario[id_node.lexema][1]
+        expr_value = self.children[1].__evaluate__() 
+        tipo = dicionario[id_node.lexema][0]
+        dict3 = {}
+        dict3[id_node.lexema] = (tipo, expr_value)
+        dicionario.update(dict3)
+  
+       	
     
     def __codegen__(self):
         if (self.isDecl):
@@ -150,7 +152,16 @@ class If(AST):
     	
     def __repr__(self):
         return self.nome
-    
+
+    def __evaluate__(self):
+        valor = self.children[0].__evaluate__()
+        print valor
+        if(valor == True):
+            self.children[1].__evaluate__()
+        else:
+            if(len(self.children) is not 2):
+                self.children[2].__evaluate__()    
+
 class While(AST):
     def __init__(self, exp, commands, father):
         AST.__init__(self,'While', father)
@@ -164,6 +175,17 @@ class While(AST):
 
     def __repr__(self):
         return self.nome
+
+    def __evaluate__(self):
+        valor = self.children[0].__evaluate__()
+        while(valor == True):
+        	self.children[1].__evaluate__()
+        	if (self.children[1].__evaluate__() == True):
+        		valor = self.children[0].__evaluate__()
+        	else:
+        		valor = False 	
+
+
         
 class Read(AST):
     def __init__(self, id_, father):
@@ -229,6 +251,24 @@ class LogicalOp(BinOp):
     def __init__(self, left, op, right, father):
         BinOp.__init__(self,'LogicalOp',left, op, right, father)
         print('Criando um nó do tipo LogicalOp com operador ' + str(op))
+    def __evaluate__(self):
+    	a = self.children[0].__evaluate__()
+        b = self.children[1].__evaluate__()
+    	if(self.op == '&&'):
+        	if(a is True and b is True):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
+        elif(self.op == '||'):
+        	if(a is True or b is True):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
+
         
 
 class ArithOp(BinOp):
@@ -239,14 +279,20 @@ class ArithOp(BinOp):
         #print('Filho da direita: ' + str(self.children[1]))
 
     def __evaluate__(self):
+        a = self.children[0].__evaluate__()
+        b = self.children[1].__evaluate__()
         if(self.op == '+'):
-            return self.left.__evaluate__() + self.right.__evaluate__()
+        	c = float(a) + float(b)
+        	return c
         elif(self.op == '-'):
-            return self.left.__evaluate__() - self.right.__evaluate__()
+        	c = float(a) - float(b)
+        	return c
         elif(self.op == '*'):
-            return self.left.__evaluate__() * self.right.__evaluate__()
+            c = float(a) * float(b)
+            return c
         elif(self.op == '/'):
-            return self.left.__evaluate__() / self.right.__evaluate__()        
+            c = float(a) / float(b)
+            return c
 
     def __codegen__(self):
         return self.left.__codegen__() + self.op + self.right.__codegen__()
@@ -255,14 +301,60 @@ class RelOp(BinOp):
     def __init__(self, left, op, right, father):
         BinOp.__init__(self,'RelOp',left, op, right, father)
         print('Criando um nó do tipo RelOp com operador ' + str(op))
+    def __evaluate__(self):
+    	a = self.children[0].__evaluate__()
+        b = self.children[1].__evaluate__()
+        if(self.op == '<'):
+        	if(a < b):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
+        elif(self.op == '<='):
+        	if(a <= b):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
+        elif(self.op == '>'):
+        	if(a > b):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
+        elif(self.op == '>='):
+        	if(a >= b):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
+        elif(self.op == '=='):
+        	if(a == b):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
+        elif(self.op == '!='):
+        	if(a != b):
+        		c = True
+        		return c
+        	else:
+        		c = False
+        		return c
 
 class Id(AST):
     """The Var node is constructed out of ID token."""
-    def __init__(self, token, father):
+    def __init__(self, token,lexema, father):
         AST.__init__(self,'Id', father)
         print('Criando um nó do tipo Id.')
         #self.children.append(token)        
-        self.token = token        
+        self.token = token 
+        self.lexema = lexema       
         #ref para entrada da tabela de símbolos 
     
     def __repr__(self):
@@ -270,10 +362,10 @@ class Id(AST):
         return self.token
     
     def __evaluate__(self):
-        te = tabSimbolos.getEntry(self.token.lexema)
-        print('Avaliando nó Id. Valor armazenado: ' + str(te.ref_valor))
-        if (te.ref_valor != None):
-            return te.ref_valor
+      
+        te = dicionario[self.lexema][1]
+        if (te != None):
+            return te
         else: 
             return 0;
     
@@ -362,17 +454,12 @@ def TabelaSimbolos():
 				elif(listaTokens[i+1] == 'COMMA'):
 					dict2[listaLexema[i]] = (tipo, 0)
 					dicionario.update(dict2)
-				elif(listaTokens[i+1] == 'ATTR'):
-					if(listaTokens[i+3] == ('PLUS' or 'MINUS' or 'DIV' or 'MULT')):
-						dicionario[listaLexema[i]] = (tipo, 0)
-						i=i+3
-
-					elif(listaTokens[i+2] == 'INTEGER_CONST' or listaTokens[i+2] == 'FLOAT_CONST'):
-						dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
-						dicionario.update(dict2)
-						i = i + 2
-					else:
-						dicionario[listaLexema[i]] = (tipo, 0)
+				elif(listaTokens[i+2] == 'INTEGER_CONST' or listaTokens[i+2] == 'FLOAT_CONST'):
+					dict2[listaLexema[i]] = (tipo, listaLexema[i+2])
+					dicionario.update(dict2)
+					i = i + 2
+				else:
+					dicionario[listaLexema[i]] = (tipo, 0)
 				i=i+1
 	print dicionario
 	return dicionario
@@ -397,6 +484,7 @@ def Programa():
    	ast = Decl_Comando(lista);
 	match('RBRACE')
 	print ast
+	return ast
 				
 def Decl_Comando(lista):  
     if (listaTokens[0] == 'INT' or listaTokens[0] == 'FLOAT'):   
@@ -417,15 +505,11 @@ def Declaracao(lista):
 	global id_node
 	Tipo();
 	if(listaTokens[0] == 'ID'):
-		id_node = Id(listaTokens[0],None)
+		id_node = Id(listaTokens[0],listaLexema[0],None)
 		#mudaTabela()
 		match('ID')
 
 	return Decl2(lista);
-
-def mudaTabela():
-	valor = dicionario[listaLexema[0]][1]
-	print "------------------", valor
 
 def Decl2(lista):
 	global id_node
@@ -434,12 +518,10 @@ def Decl2(lista):
 		match('COMMA')
 		match('ID')
 		return Decl2(lista)
-		#OLHAR ISSO - TABELA DE SIMBOLOS
 
 	elif(listaTokens[0] == 'PCOMMA'):
 		match('PCOMMA')	
 		return lista
-		#OLHAR ISSO
 
 	elif(listaTokens[0] == 'ATTR'):
 		match('ATTR')
@@ -461,11 +543,8 @@ def Tipo():
 def Comando(lista):
 	if(listaTokens[0] == 'LBRACE'):
 		return Bloco(lista)
-
 	elif(listaTokens[0] == 'ID'):
-		#tabela de simbolos
 		return Atribuicao(lista)
-
 	elif(listaTokens[0] == 'IF'):
 		return ComandoSe(lista)
 	elif(listaTokens[0] == 'WHILE'):
@@ -485,7 +564,7 @@ def Bloco(lista):
 	return lista
 
 def Atribuicao(lista):
-	id_node = Id(listaTokens[0],None)
+	id_node = Id(listaTokens[0],listaLexema[0],None)
 	match('ID')
 	match('ATTR')
 	expr_node = Expressao()
@@ -497,7 +576,7 @@ def Atribuicao(lista):
 def ComandoRead(lista):
 	read_node = Read('READ')
 	match('READ')
-	id_node = Id(listaTokens[0],None)
+	id_node = Id(listaTokens[0],listaLexema[0],None)
 	read_node.children.append(id_node)
 	match('ID')
 	match('PCOMMA')	
@@ -701,15 +780,15 @@ def OpMult():
 
 def Fator():
 	if(listaTokens[0] == 'ID'):
-		id_node = Id(listaTokens[0],None)
+		id_node = Id(listaTokens[0],listaLexema[0],None)
 		match('ID')
 		return id_node
 	elif(listaTokens[0] == 'INTEGER_CONST'):
-		num_node = Num(listaTokens[0],None,int_type)
+		num_node = Num(listaLexema[0],None,int_type)
 		match('INTEGER_CONST')
 		return num_node
 	elif(listaTokens[0] == 'FLOAT_CONST'):
-		num_node = Num(listaToken[0],None,float_type)
+		num_node = Num(listaLexema[0],None,float_type)
 		match('FLOAT_CONST')
 		return num_node
 	elif(listaTokens[0] == 'LBRACKET'):
