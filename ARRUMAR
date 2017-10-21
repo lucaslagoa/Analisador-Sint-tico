@@ -1,5 +1,5 @@
 - tabela de simbolos - ACHO QUE ARRUMEI TESTAR DEPOIS
-- evaluate(while)
-- evaluate (if)
-- depois da árvore saiu da recursão
-- evaluate (attr)
+- evaluate(while) 
+- evaluate (if) - acho que tá certo, o que tá errado é a primeira atribuição
+- depois da árvore saiu da recursão - erro foi quando inseriu a árvore então não sei como arrumar
+- evaluate (attr) - o valor de A tá recebendo o de B ( achei o erro agora é arrumar)

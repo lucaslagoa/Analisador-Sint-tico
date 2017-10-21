@@ -105,14 +105,16 @@ class Assign(AST):
         id_node = self.children[0]
         lex = id_node.lexema
         print "teste 1 - lex: " , lex
-        te = dicionario[lex][1]
-        print "teste 2 - te : " , te
         tipo = dicionario[lex][0]
         dict3 = {}
         expr_value = self.children[1].__evaluate__()
+        print 'Valor da expressão no lado direito ' + str(expr_value)
+
         print "teste 3, expr_value : " , expr_value
-        dict3[id_node.lexema] = (tipo, expr_value)
+        print'Valor do lexema ' , str(lex) ,  ': ' , str(expr_value)
+        dict3[lex] = (tipo, expr_value)
         dicionario.update(dict3)
+        
         print "teste 4, dicionario:" , dicionario
   
        	
@@ -160,7 +162,6 @@ class If(AST):
     def __evaluate__(self):
     	print('Avaliando If.')
         valor = self.children[0].__evaluate__()
-        print valor
         if(valor == True):
             self.children[1].__evaluate__()
         else:
@@ -355,8 +356,8 @@ class RelOp(BinOp):
 
 class Id(AST):
     """The Var node is constructed out of ID token."""
-    def __init__(self, token,lexema, father):
-        AST.__init__(self,'Id', father)
+    def __init__(self,token,lexema,father):
+        AST.__init__(self,'Id',father)
         print('Criando um nó do tipo Id.')
         #self.children.append(token)        
         self.token = token 
@@ -368,7 +369,6 @@ class Id(AST):
         return self.token
     
     def __evaluate__(self):
-      
         te = dicionario[self.lexema][1]
         if (te != None):
             return te
@@ -509,6 +509,7 @@ def Declaracao(lista):
 	Tipo();
 	if(listaTokens[0] == 'ID'):
 		id_node = Id(listaTokens[0],listaLexema[0],None)
+		print listaLexema[0], "lista lexema"
 		match('ID')
 
 	return Decl2(lista);
@@ -529,7 +530,8 @@ def Decl2(lista):
 		match('ATTR')
 		expr_node = Expressao()
 		attr_node = Assign(id_node,'=',expr_node,None)
-		lista.children.append(attr_node)        
+		attr_node.__setIsDecl__(True)
+		lista.children.append(attr_node) 
         return Decl2(lista); 
 
   	return lista;
@@ -567,6 +569,7 @@ def Bloco(lista):
 
 def Atribuicao(lista):
 	id_node = Id(listaTokens[0],listaLexema[0],None)
+	print listaLexema[0], "lista lexema"
 	match('ID')
 	match('ATTR')
 	expr_node = Expressao()
@@ -783,6 +786,7 @@ def OpMult():
 def Fator():
 	if(listaTokens[0] == 'ID'):
 		id_node = Id(listaTokens[0],listaLexema[0],None)
+		print listaLexema[0], "lista lexema"
 		match('ID')
 		return id_node
 	elif(listaTokens[0] == 'INTEGER_CONST'):

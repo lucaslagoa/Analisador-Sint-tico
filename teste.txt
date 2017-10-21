@@ -1,5 +1,8 @@
 int main () {
-  int a=2,b=1,c;
-  c = 1 + 2;
+  int a=2,b=5,c,d=10;
+  if(b<c){
+    c = c + b * d;
+  }
+  
 
 }
