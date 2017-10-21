@@ -63,11 +63,6 @@ class AST(object):
         for child in self.children: 
             print(str(child.__codegen__()))
         
-
-"""
-O cabeçalho int main() é gerado antes
-"""
-
 class Compound(AST):
     """Represents a 'BEGIN ... END' block"""
     def __init__(self,father):
@@ -104,19 +99,12 @@ class Assign(AST):
         print('Avaliando atribuição.')        
         id_node = self.children[0]
         lex = id_node.lexema
-        print "teste 1 - lex: " , lex
         tipo = dicionario[lex][0]
         dict3 = {}
         expr_value = self.children[1].__evaluate__()
-        print 'Valor da expressão no lado direito ' + str(expr_value)
-
-        print "teste 3, expr_value : " , expr_value
-        print'Valor do lexema ' , str(lex) ,  ': ' , str(expr_value)
         dict3[lex] = (tipo, expr_value)
         dicionario.update(dict3)
-        
-        print "teste 4, dicionario:" , dicionario
-  
+
        	
     
     def __codegen__(self):
@@ -257,6 +245,7 @@ class LogicalOp(BinOp):
     def __init__(self, left, op, right, father):
         BinOp.__init__(self,'LogicalOp',left, op, right, father)
         print('Criando um nó do tipo LogicalOp com operador ' + str(op))
+
     def __evaluate__(self):
     	print('Avaliando LogicalOp.')
     	a = self.children[0].__evaluate__()
@@ -282,8 +271,6 @@ class ArithOp(BinOp):
     def __init__(self, left, op, right, father):
         BinOp.__init__(self,'ArithOp',left, op, right, father)
         print('Criando um nó do tipo ArithOp com operador ' + str(op))
-        #print('Filho da esquerda: ' + str(self.children[0]))
-        #print('Filho da direita: ' + str(self.children[1]))
 
     def __evaluate__(self):
         a = self.children[0].__evaluate__()
@@ -509,7 +496,6 @@ def Declaracao(lista):
 	Tipo();
 	if(listaTokens[0] == 'ID'):
 		id_node = Id(listaTokens[0],listaLexema[0],None)
-		print listaLexema[0], "lista lexema"
 		match('ID')
 
 	return Decl2(lista);
