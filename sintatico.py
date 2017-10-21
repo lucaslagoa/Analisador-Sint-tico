@@ -99,17 +99,14 @@ class Assign(AST):
         print('Avaliando atribuição.')        
         id_node = self.children[0]
         lex = id_node.lexema
-        print "lex: " , lex
         tipo = dicionario[lex][0]
         dict3 = {}
         expr_value = self.children[1].__evaluate__()
-        print "expr_value: " , expr_value
-        dict3[lex] = (tipo, expr_value)
-        dicionario.update(dict3)
-        print "dicionario: " , dicionario
+        if(expr_value != True or expr_value != False):
+        	dict3[lex] = (tipo, expr_value)
+        	dicionario.update(dict3)
 
-       	
-    
+           
     def __codegen__(self):
         if (self.isDecl):
             id_node = self.children[0]
@@ -178,10 +175,7 @@ class While(AST):
         valor = self.children[0].__evaluate__()
         while(valor == True):
         	self.children[1].__evaluate__()
-        	if (self.children[1].__evaluate__() == True):
-        		valor = self.children[0].__evaluate__()
-        	else:
-        		valor = False		
+        	valor = self.children[0].__evaluate__()
 
         
 class Read(AST):
@@ -253,6 +247,7 @@ class LogicalOp(BinOp):
     	print('Avaliando LogicalOp.')
     	a = self.children[0].__evaluate__()
         b = self.children[1].__evaluate__()
+       
     	if(self.op == '&&'):
         	if(a is True and b is True):
         		c = True
@@ -302,42 +297,42 @@ class RelOp(BinOp):
     	a = self.children[0].__evaluate__()
         b = self.children[1].__evaluate__()
         if(self.op == '<'):
-        	if(a < b):
+        	if(float(a) < float(b)):
         		c = True
         		return c
         	else:
         		c = False
         		return c
         elif(self.op == '<='):
-        	if(a <= b):
+        	if(float(a) <= float(b)):
         		c = True
         		return c
         	else:
         		c = False
         		return c
         elif(self.op == '>'):
-        	if(a > b):
+        	if(float(a) > float(b)):
         		c = True
         		return c
         	else:
         		c = False
         		return c
         elif(self.op == '>='):
-        	if(a >= b):
+        	if(float(a) >= float(b)):
         		c = True
         		return c
         	else:
         		c = False
         		return c
         elif(self.op == '=='):
-        	if(a == b):
+        	if(float(a) == float(b)):
         		c = True
         		return c
         	else:
         		c = False
         		return c
         elif(self.op == '!='):
-        	if(a != b):
+        	if(float(a) != float(b)):
         		c = True
         		return c
         	else:
@@ -505,10 +500,10 @@ def Declaracao(lista):
 
 def Decl2(lista):
 	global id_node
-	print id_node.lexema
-
+	
 	if(listaTokens[0] == 'COMMA'):
 		match('COMMA')
+		id_node = Id(listaTokens[0],listaLexema[0],None)
 		match('ID')
 		return Decl2(lista)
 
@@ -520,7 +515,6 @@ def Decl2(lista):
 		match('ATTR')
 		expr_node = Expressao()
 		attr_node = Assign(id_node,'=',expr_node,None)
-		print id_node
 		lista.children.append(attr_node)
 		return Decl2(lista); 
 
@@ -549,8 +543,8 @@ def Comando(lista):
 		return ComandoPrint(lista)
 
 def Bloco(lista):
-	bloco = AST('Bloco',None)
 	match('LBRACE')
+	bloco = AST('Bloco',None)
 	retorno = Decl_Comando(bloco)
 	match('RBRACE')	
 	lista.children.append(retorno)
