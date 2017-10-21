@@ -99,11 +99,14 @@ class Assign(AST):
         print('Avaliando atribuição.')        
         id_node = self.children[0]
         lex = id_node.lexema
+        print "lex: " , lex
         tipo = dicionario[lex][0]
         dict3 = {}
         expr_value = self.children[1].__evaluate__()
+        print "expr_value: " , expr_value
         dict3[lex] = (tipo, expr_value)
         dicionario.update(dict3)
+        print "dicionario: " , dicionario
 
        	
     
@@ -502,6 +505,7 @@ def Declaracao(lista):
 
 def Decl2(lista):
 	global id_node
+	print id_node.lexema
 
 	if(listaTokens[0] == 'COMMA'):
 		match('COMMA')
@@ -516,9 +520,9 @@ def Decl2(lista):
 		match('ATTR')
 		expr_node = Expressao()
 		attr_node = Assign(id_node,'=',expr_node,None)
-		attr_node.__setIsDecl__(True)
-		lista.children.append(attr_node) 
-        return Decl2(lista); 
+		print id_node
+		lista.children.append(attr_node)
+		return Decl2(lista); 
 
   	return lista;
 				
@@ -555,7 +559,6 @@ def Bloco(lista):
 
 def Atribuicao(lista):
 	id_node = Id(listaTokens[0],listaLexema[0],None)
-	print listaLexema[0], "lista lexema"
 	match('ID')
 	match('ATTR')
 	expr_node = Expressao()
@@ -623,7 +626,7 @@ def ComandoPrint(lista):
 	return lista
 
 
-def Expressao(): #expressao        
+def Expressao():      
     expr = Conjuncao();
     return ExpressaoOpc(expr);
 
@@ -772,7 +775,6 @@ def OpMult():
 def Fator():
 	if(listaTokens[0] == 'ID'):
 		id_node = Id(listaTokens[0],listaLexema[0],None)
-		print listaLexema[0], "lista lexema"
 		match('ID')
 		return id_node
 	elif(listaTokens[0] == 'INTEGER_CONST'):
